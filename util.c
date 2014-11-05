@@ -1620,6 +1620,24 @@ double tdiff(struct timeval *end, struct timeval *start)
 	return end->tv_sec - start->tv_sec + (end->tv_usec - start->tv_usec) / 1000000.0;
 }
 
+void check_extranonce_option(struct pool *pool, char * url)
+{
+	char extra_op[16],*extra_op_loc;
+	extra_op_loc = strstr(url,"#");
+        if(extra_op_loc && !pool->extranonce_subscribe)
+        {
+                strcpy(extra_op, extra_op_loc);
+                *extra_op_loc = '\0';
+		if(!strcmp(extra_op,"#xnsub"))
+		{
+			pool->extranonce_subscribe = true;
+			printf("Extra nonce subscribing enabled.");
+			return;
+		}
+        }
+	return;
+}
+
 bool extract_sockaddr(char *url, char **sockaddr_url, char **sockaddr_port)
 {
 	char *url_begin, *url_end, *ipv6_begin, *ipv6_end, *port_start = NULL;
@@ -2782,6 +2800,78 @@ void suspend_stratum(struct pool *pool)
 	mutex_lock(&pool->stratum_lock);
 	__suspend_stratum(pool);
 	mutex_unlock(&pool->stratum_lock);
+}
+
+bool extranonce_subscribe(struct pool *pool)
+{
+	bool ret = false, recvd = false, noresume = false, sockd = false;
+	char s[RBUFSIZE], *sret = NULL, *nonce1, *sessionid;
+	json_t *val = NULL, *res_val, *err_val;
+	json_error_t err;
+	int n2size;
+
+//resend:
+//	if (!setup_stratum_socket(pool)) {
+//		sockd = false;
+//		goto out;
+//	}
+//
+//	sockd = true;
+//
+//	if (recvd) {
+//		/* Get rid of any crap lying around if we're resending */
+//		clear_sock(pool);
+//		sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": []}", swork_id++);
+//	} else {
+//		if (pool->sessionid)
+//			sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": [\""PACKAGE"/"VERSION"\", \"%s\"]}", swork_id++, pool->sessionid);
+//		else
+//			sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": [\""PACKAGE"/"VERSION"\"]}", swork_id++);
+//	}
+	sprintf(s,"{\"id\": %d, \"method\": \"mining.extranonce.subscribe\", \"params\": []}", swork_id++);
+	if (__stratum_send(pool, s, strlen(s)) != SEND_OK) {
+		applog(LOG_DEBUG, "Failed to send s in extranonce_subscribe");
+		goto out;
+	}
+
+	if (!socket_full(pool, DEFAULT_SOCKWAIT)) {
+		applog(LOG_DEBUG, "Timed out waiting for response in extranonce_subscribe");
+		goto out;
+	}
+
+	sret = recv_line(pool);
+	if (!sret)
+		goto out;
+
+	recvd = true;
+
+	val = JSON_LOADS(sret, &err);
+	free(sret);
+	if (!val) {
+		applog(LOG_INFO, "JSON decode failed(%d): %s", err.line, err.text);
+		goto out;
+	}
+
+	res_val = json_object_get(val, "result");
+	err_val = json_object_get(val, "error");
+
+	if (!res_val || json_is_null(res_val) ||
+	    (err_val && !json_is_null(err_val))) {
+		char *ss;
+
+		if (err_val)
+			ss = json_dumps(err_val, JSON_INDENT(3));
+		else
+			ss = strdup("(unknown reason)");
+
+		applog(LOG_INFO, "JSON-RPC decode failed: %s", ss);
+
+		free(ss);
+
+		goto out;
+	}
+out:
+	return ret;
 }
 
 bool initiate_stratum(struct pool *pool)
