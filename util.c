@@ -2138,6 +2138,40 @@ static bool parse_diff(struct pool *pool, json_t *val)
 	return true;
 }
 
+static bool parse_extranonce(struct pool *pool, json_t *val)
+{
+        int n2size;
+	char* nonce1;
+        
+        nonce1 = json_array_string(val, 0);
+        if (!valid_hex(nonce1)) {
+                applog(LOG_INFO, "Failed to get valid nonce1 in parse_extranonce");
+                goto out;
+        }
+        n2size = json_integer_value(json_array_get(val, 1));
+        if (n2size < 2 || n2size > 16) {
+                applog(LOG_INFO, "Failed to get valid n2size in parse_extranonce");
+                free(nonce1);
+                goto out;
+        }
+
+        cg_wlock(&pool->data_lock);
+        pool->nonce1 = nonce1;
+        pool->n1_len = strlen(nonce1) / 2;
+        free(pool->nonce1bin);
+        pool->nonce1bin = calloc(pool->n1_len, 1);
+        if (unlikely(!pool->nonce1bin))
+                quithere(1, "Failed to calloc pool->nonce1bin");
+        hex2bin(pool->nonce1bin, pool->nonce1, pool->n1_len);
+        pool->n2size = n2size;
+	applog(LOG_NOTICE, "Pool %d confirmed mining.extranonce.subscribe with extranonce1 %s extran2size %d",
+                               pool->pool_no, pool->nonce1, pool->n2size);
+        cg_wunlock(&pool->data_lock);
+	return true;
+out:
+	return false;
+}
+
 static void __suspend_stratum(struct pool *pool)
 {
 	clear_sockbuf(pool);
@@ -2302,6 +2336,12 @@ bool parse_method(struct pool *pool, char *s)
 		ret = parse_diff(pool, params);
 		goto out_decref;
 	}
+	
+	if(!strncasecmp(buf, "mining.set_extranonce", 21)) {
+		ret = parse_extranonce(pool, params);
+		goto out_decref;
+	}
+
 
 	if (!strncasecmp(buf, "client.reconnect", 16)) {
 		ret = parse_reconnect(pool, params);
@@ -2802,78 +2842,6 @@ void suspend_stratum(struct pool *pool)
 	mutex_unlock(&pool->stratum_lock);
 }
 
-bool extranonce_subscribe(struct pool *pool)
-{
-	bool ret = false, recvd = false, noresume = false, sockd = false;
-	char s[RBUFSIZE], *sret = NULL, *nonce1, *sessionid;
-	json_t *val = NULL, *res_val, *err_val;
-	json_error_t err;
-	int n2size;
-
-//resend:
-//	if (!setup_stratum_socket(pool)) {
-//		sockd = false;
-//		goto out;
-//	}
-//
-//	sockd = true;
-//
-//	if (recvd) {
-//		/* Get rid of any crap lying around if we're resending */
-//		clear_sock(pool);
-//		sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": []}", swork_id++);
-//	} else {
-//		if (pool->sessionid)
-//			sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": [\""PACKAGE"/"VERSION"\", \"%s\"]}", swork_id++, pool->sessionid);
-//		else
-//			sprintf(s, "{\"id\": %d, \"method\": \"mining.subscribe\", \"params\": [\""PACKAGE"/"VERSION"\"]}", swork_id++);
-//	}
-	sprintf(s,"{\"id\": %d, \"method\": \"mining.extranonce.subscribe\", \"params\": []}", swork_id++);
-	if (__stratum_send(pool, s, strlen(s)) != SEND_OK) {
-		applog(LOG_DEBUG, "Failed to send s in extranonce_subscribe");
-		goto out;
-	}
-
-	if (!socket_full(pool, DEFAULT_SOCKWAIT)) {
-		applog(LOG_DEBUG, "Timed out waiting for response in extranonce_subscribe");
-		goto out;
-	}
-
-	sret = recv_line(pool);
-	if (!sret)
-		goto out;
-
-	recvd = true;
-
-	val = JSON_LOADS(sret, &err);
-	free(sret);
-	if (!val) {
-		applog(LOG_INFO, "JSON decode failed(%d): %s", err.line, err.text);
-		goto out;
-	}
-
-	res_val = json_object_get(val, "result");
-	err_val = json_object_get(val, "error");
-
-	if (!res_val || json_is_null(res_val) ||
-	    (err_val && !json_is_null(err_val))) {
-		char *ss;
-
-		if (err_val)
-			ss = json_dumps(err_val, JSON_INDENT(3));
-		else
-			ss = strdup("(unknown reason)");
-
-		applog(LOG_INFO, "JSON-RPC decode failed: %s", ss);
-
-		free(ss);
-
-		goto out;
-	}
-out:
-	return ret;
-}
-
 bool initiate_stratum(struct pool *pool)
 {
 	bool ret = false, recvd = false, noresume = false, sockd = false;
@@ -2976,6 +2944,7 @@ resend:
 		applog(LOG_DEBUG, "Pool %d stratum session id: %s", pool->pool_no, pool->sessionid);
 
 	ret = true;
+
 out:
 	if (ret) {
 		if (!pool->stratum_url)
@@ -2985,6 +2954,11 @@ out:
 		if (opt_protocol) {
 			applog(LOG_DEBUG, "Pool %d confirmed mining.subscribe with extranonce1 %s extran2size %d",
 			       pool->pool_no, pool->nonce1, pool->n2size);
+		}
+		if(pool->extranonce_subscribe)
+		{
+			sprintf(s,"{\"id\": %d, \"method\": \"mining.extranonce.subscribe\", \"params\": []}", swork_id++);
+		        stratum_send(pool, s, strlen(s));
 		}
 	} else {
 		if (recvd && !noresume) {
