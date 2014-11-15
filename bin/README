@@ -1,0 +1,7 @@
+Bitmain AntMiner S1 binary cross compiled with the OpenWrt toolchain
+
+with extranonce.subscribe
+
+drop in replacement for /usr/bin/cgminer
+
+THIS IS BETA TEST CODE! NOT FOR PRODUCTION USE!
