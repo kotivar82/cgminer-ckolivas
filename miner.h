@@ -230,6 +230,7 @@ static inline int fsync (int fd)
 
 #define ASIC_PARSE_COMMANDS(DRIVER_ADD_COMMAND) \
 	DRIVER_ADD_COMMAND(ants1) \
+	DRIVER_ADD_COMMAND(ants1a) \
 	DRIVER_ADD_COMMAND(ants2) \
 	DRIVER_ADD_COMMAND(avalon) \
 	DRIVER_ADD_COMMAND(avalon2) \
@@ -1016,6 +1017,10 @@ extern char *opt_bab_options;
 extern char *opt_bitmine_a1_options;
 #endif
 #ifdef USE_ANT_S1
+extern char *opt_bitmain_options;
+extern bool opt_bitmain_hwerror;
+#endif
+#ifdef USE_ANT_S1a
 extern char *opt_bitmain_options;
 extern bool opt_bitmain_hwerror;
 #endif

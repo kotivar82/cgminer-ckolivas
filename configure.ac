@@ -123,8 +123,9 @@ fi
 # All drivers should prepend an x to the drivercount
 
 standalone="no"
-ants1="no"
 drivercount=""
+
+ants1="no"
 
 AC_ARG_ENABLE([ants1],
 	[AC_HELP_STRING([--enable-ants1],[Compile support for Antminer S1 Bitmain STANDALONE(default disabled)])],
@@ -136,6 +137,19 @@ if test "x$ants1" = xyes; then
 	standalone="yes"
 fi
 AM_CONDITIONAL([HAS_ANT_S1], [test x$ants1 = xyes])
+
+ants1a="no"
+
+AC_ARG_ENABLE([ants1a],
+	[AC_HELP_STRING([--enable-ants1a],[Compile support for Antminer S1a Bitmain STANDALONE(default disabled)])],
+	[ants1a=$enableval]
+	)
+if test "x$ants1a" = xyes; then
+	AC_DEFINE([USE_ANT_S1a], [1], [Defined to 1 if Antminer S1a Bitmain support is wanted])
+	drivercount=x$drivercount
+	standalone="yes"
+fi
+AM_CONDITIONAL([HAS_ANT_S1a], [test x$ants1a = xyes])
 
 
 ants2="no"
@@ -431,7 +445,7 @@ fi
 
 
 #Add a new device to this list if it needs libusb, along with a no on the end.
-if test x$avalon$avalon2$bitforce$bitfury$blockerupter$modminer$bflsc$icarus$hashfast$hashratio$klondike$drillbit$cointerra$ants1$ants2 != xnonononononononononononononono; then
+if test x$avalon$avalon2$bitforce$bitfury$blockerupter$modminer$bflsc$icarus$hashfast$hashratio$klondike$drillbit$cointerra$ants1$ants1a$ants2 != xnononononononononononononononono; then
 	want_usbutils=true
 else
 	want_usbutils=false
@@ -631,6 +645,12 @@ else
 	echo "  Antminer.S1.Bitmain..: Disabled"
 fi
 
+if test "x$ants1a" = xyes; then
+	echo "  Antminer.S1a.Bitmain..: Enabled"
+else
+	echo "  Antminer.S1a.Bitmain..: Disabled"
+fi
+
 if test "x$ants2" = xyes; then
 	echo "  Antminer.S2.Bitmain..: Enabled"
 else
@@ -754,7 +774,7 @@ else
 fi
 
 #Add any new device to this, along with a no on the end of the test
-if test "x$avalon$avalon2$bab$bflsc$bitforce$bitfury$blockerupter$hashfast$hashratio$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$ants1$ants2$sp10$sp30" = xnonononononononononononononononononononono; then
+if test "x$avalon$avalon2$bab$bflsc$bitforce$bitfury$blockerupter$hashfast$hashratio$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$ants1$ants1a$ants2$sp10$sp30" = xnononononononononononononononononononononono; then
 	AC_MSG_ERROR([No mining devices configured in])
 fi
 
