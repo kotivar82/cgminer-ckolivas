@@ -104,6 +104,10 @@ char *curly = ":D";
 #include "driver-bitmain.h"
 #endif
 
+#if defined(USE_ANT_S1a)
+#include "driver-bitmain-s1a.h"
+#endif
+
 #if defined(USE_BITFORCE) || defined(USE_ICARUS) || defined(USE_AVALON) || defined(USE_AVALON2) || defined(USE_MODMINER)
 #	define USE_FPGA
 #endif
@@ -247,7 +251,7 @@ char *opt_bab_options = NULL;
 #ifdef USE_BITMINE_A1
 char *opt_bitmine_a1_options = NULL;
 #endif
-#if defined(USE_ANT_S1) || defined(USE_ANT_S2)
+#if defined(USE_ANT_S1) || defined(USE_ANT_S1a) || defined(USE_ANT_S2)
 char *opt_bitmain_options;
 static char *opt_set_bitmain_fan;
 static char *opt_set_bitmain_freq;
@@ -1205,7 +1209,7 @@ static struct opt_table opt_config_table[] = {
 		     opt_set_charp, NULL, &opt_bitburner_fury_options,
 		     "Override avalon-options for BitBurner Fury boards baud:miners:asic:timeout:freq"),
 #endif
-#if defined(USE_ANT_S1) || defined(USE_ANT_S2)
+#if defined(USE_ANT_S1) || defined(USE_ANT_S1a) || defined(USE_ANT_S2)
 	OPT_WITHOUT_ARG("--bitmain-auto",
 			opt_set_bool, &opt_bitmain_auto,
 			"Adjust bitmain overclock frequency dynamically for best hashrate"),
@@ -1752,6 +1756,9 @@ static char *opt_verusage_and_exit(const char *extra)
 	printf("%s\nBuilt with "
 #ifdef USE_ANT_S1
 		"ant.S1 "
+#endif
+#ifdef USE_ANT_S1a
+		"ant.S1a "
 #endif
 #ifdef USE_ANT_S2
 		"ant.S2 "

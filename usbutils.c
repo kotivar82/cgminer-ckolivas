@@ -398,6 +398,17 @@ static struct usb_intinfo ants1_ints[] = {
 };
 #endif
 
+#ifdef USE_ANT_S1a
+static struct usb_epinfo ants1_epinfos[] = {
+	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPI(1), 0, 0 },
+	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPO(1), 0, 0 }
+};
+
+static struct usb_intinfo ants1_ints[] = {
+	USB_EPS(0, ants1_epinfos)
+};
+#endif
+
 #ifdef USE_ANT_S2
 static struct usb_epinfo ants2_epinfos[] = {
 	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPI(1), 0, 0 },
@@ -784,6 +795,18 @@ static struct usb_find_devices find_dev[] = {
 	{
 		.drv = DRIVER_ants1,
 		.name = "ANT",
+		.ident = IDENT_ANT,
+		.idVendor = 0x4254,
+		.idProduct = 0x4153,
+		.config = 1,
+		.timeout = ANT_S1_TIMEOUT_MS,
+		.latency = LATENCY_ANTS1,
+		INTINFO(ants1_ints) },
+#endif
+#ifdef USE_ANT_S1a
+	{
+		.drv = DRIVER_ants1a,
+		.name = "S1A",
 		.ident = IDENT_ANT,
 		.idVendor = 0x4254,
 		.idProduct = 0x4153,

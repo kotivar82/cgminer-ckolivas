@@ -146,6 +146,10 @@ if HAS_ANT_S1
 cgminer_SOURCES += driver-bitmain.c driver-bitmain.h
 endif
 
+if HAS_ANT_S1a
+cgminer_SOURCES += driver-bitmain-s1a.c driver-bitmain-s1a.h
+endif
+
 if HAS_ANT_S2
 cgminer_SOURCES += driver-bitmain.c driver-bitmain.h
 endif
