@@ -1,16 +1,43 @@
 Bitmain AntMiner S1 binary cross compiled with the OpenWrt toolchain.
 
-Sourced from: https://github.com/nicehash/cgminer-ckolivas
+Sourced from:
+     https://github.com/nicehash/cgminer-ckolivas
+
+S1 driver sourced from:
+     https://github.com/kanoi/cgminer -b ants1-4.3.2a-85fcf0c
+as:
+     driver-bitmain-s1a.c, driver-bitmain-s1a.h
 
 Replaced api version 3.5 with api version 3.3 so S1 web interface Miner Status
 page works.
 
-With extranonce.subscribe used with nicehash.com & westhash.com
 
-Enable curses and curl. It is possible to solo mine directly from the S1
-as long as it is properly re-configured manually.
-
+cgminer:
 
 Drop in replacement for /usr/bin/cgminer
+
+With extranonce.subscribe as used with nicehash.com & westhash.com
+
+
+
+cgminer-solo:
+
+Enabled curses and curl. It is possible to solo mine directly from the S1
+as long as it is properly re-configured manually!!!
+
+You will need to install libcurl, libncurses and libpolarssl for this binary to
+function.
+
+With the most recent Bitmain S1 image Check /etc/opkg.conf line:
+src/gz barrier_breaker
+
+make sure it is:
+http://downloads.openwrt.org/barrier_breaker/14.07/ar71xx/generic/packages/base
+
+Then issue:
+# opkg update
+# opkg install libcurl
+# opkg install libncurses
+# opkg install libpolarssl
 
 THIS IS BETA TEST CODE! NOT FOR PRODUCTION USE!
