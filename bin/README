@@ -1,7 +1,16 @@
-Bitmain AntMiner S1 binary cross compiled with the OpenWrt toolchain
+Bitmain AntMiner S1 binary cross compiled with the OpenWrt toolchain.
 
-with extranonce.subscribe
+Sourced from: https://github.com/nicehash/cgminer-ckolivas
 
-drop in replacement for /usr/bin/cgminer
+Replaced api version 3.5 with api version 3.3 so S1 web interface Miner Status
+page works.
+
+With extranonce.subscribe used with nicehash.com & westhash.com
+
+Enable curses and curl. It is possible to solo mine directly from the S1
+as long as it is properly re-configured manually.
+
+
+Drop in replacement for /usr/bin/cgminer
 
 THIS IS BETA TEST CODE! NOT FOR PRODUCTION USE!
