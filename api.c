@@ -4390,7 +4390,7 @@ static void setup_groups() {
  * N.B. IP4 addresses are by Definition 32bit big endian on all platforms
  */
 static void setup_ipaccess() {
-	char *buf, *ptr, *comma, *slash, *dot;
+	char *buf, *ptr, *comma, *slash, *dot, *end;
 	int ipcount, mask, octet, i;
 	char group;
 
@@ -4440,28 +4440,28 @@ static void setup_ipaccess() {
 		if (strcmp(ptr, ALLIP4) == 0)
 			ipaccess[ips].ip = ipaccess[ips].mask = 0;
 		else {
-<<<<<<< HEAD
-			end = strchr(ptr, '/');
-			if (!end) {
-				for (i = 0; i < 16; i++)
-					ipaccess[ips].mask.s6_addr[i] = 0xff;
-				end = ptr + strlen(ptr);
-			}
-			slash = end--;
-			if (*ptr == '[' && *end == ']') {
-				*(ptr++) = '\0';
-				*(end--) = '\0';
-				ipv6 = true;
-			}
-			else
-				ipv6 = false;
-			if (*slash) {
-=======
+//<<<<<<< HEAD
+//			end = strchr(ptr, '/');
+//			if (!end) {
+//				for (i = 0; i < 16; i++)
+//					ipaccess[ips].mask.s6_addr[i] = 0xff;
+//				end = ptr + strlen(ptr);
+//			}
+//			slash = end--;
+//			if (*ptr == '[' && *end == ']') {
+//				*(ptr++) = '\0';
+//				*(end--) = '\0';
+//				ipv6 = true;
+//			}
+//			else
+//				ipv6 = false;
+//			if (*slash) {
+//=======
 			slash = strchr(ptr, '/');
 			if (!slash)
 				ipaccess[ips].mask = 0xffffffff;
 			else {
->>>>>>> replaced api version 3.5 with version 3.3 so web interface Miner Status works
+//>>>>>>> replaced api version 3.5 with version 3.3 so web interface Miner Status works
 				*(slash++) = '\0';
 				mask = atoi(slash);
 				if (mask < 1 || mask > 32)
