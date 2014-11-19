@@ -4390,7 +4390,11 @@ static void setup_groups() {
  * N.B. IP4 addresses are by Definition 32bit big endian on all platforms
  */
 static void setup_ipaccess() {
+<<<<<<< HEAD
 	char *buf, *ptr, *comma, *slash, *dot, *end;
+=======
+	char *buf, *ptr, *comma, *slash, *dot;
+>>>>>>> 18c51cf1acde848eaa680fc3ec03bf00b075e41a
 	int ipcount, mask, octet, i;
 	char group;
 
@@ -4440,6 +4444,7 @@ static void setup_ipaccess() {
 		if (strcmp(ptr, ALLIP4) == 0)
 			ipaccess[ips].ip = ipaccess[ips].mask = 0;
 		else {
+<<<<<<< HEAD
 //<<<<<<< HEAD
 //			end = strchr(ptr, '/');
 //			if (!end) {
@@ -4457,11 +4462,16 @@ static void setup_ipaccess() {
 //				ipv6 = false;
 //			if (*slash) {
 //=======
+=======
+>>>>>>> 18c51cf1acde848eaa680fc3ec03bf00b075e41a
 			slash = strchr(ptr, '/');
 			if (!slash)
 				ipaccess[ips].mask = 0xffffffff;
 			else {
+<<<<<<< HEAD
 //>>>>>>> replaced api version 3.5 with version 3.3 so web interface Miner Status works
+=======
+>>>>>>> 18c51cf1acde848eaa680fc3ec03bf00b075e41a
 				*(slash++) = '\0';
 				mask = atoi(slash);
 				if (mask < 1 || mask > 32)
