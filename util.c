@@ -1628,12 +1628,12 @@ void check_extranonce_option(struct pool *pool, char * url)
         {
                 strcpy(extra_op, extra_op_loc);
                 *extra_op_loc = '\0';
-		if(!strcmp(extra_op,"#xnsub"))
-		{
-			pool->extranonce_subscribe = true;
-			printf("Extra nonce subscribing enabled.");
-			return;
-		}
+                if(!strcmp(extra_op,"#xnsub"))
+                {
+                	pool->extranonce_subscribe = true;
+                	printf("Extra nonce subscribing enabled.");
+                	return;
+                }
         }
 	return;
 }
